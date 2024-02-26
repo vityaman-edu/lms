@@ -1,0 +1,5 @@
+MD013:
+  line_length: 2000 # We use word-wrapping
+  heading_line_length: 80
+  code_block_line_length: 80
+  strict: true
