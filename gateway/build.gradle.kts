@@ -106,3 +106,7 @@ ktlint {
         }
     }
 }
+
+tasks.runKtlintCheckOverMainSourceSet {
+    dependsOn(tasks.getByName(generateControllers))
+}
