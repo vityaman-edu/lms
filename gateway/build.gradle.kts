@@ -1,3 +1,5 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
@@ -6,6 +8,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     id("org.openapi.generator") version "5.3.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("io.gitlab.arturbosch.detekt") version "1.23.5"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
 }
@@ -38,6 +41,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
 }
 
 tasks.withType<KotlinCompile> {
@@ -109,4 +113,27 @@ ktlint {
 
 tasks.runKtlintCheckOverMainSourceSet {
     dependsOn(tasks.getByName(generateControllers))
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(file("${layout.projectDirectory}/../config/detekt.yml"))
+}
+
+tasks.withType<Detekt>().configureEach {
+    reports {
+        html.required = true
+        txt.required = true
+        sarif.required = true
+        md.required = true
+    }
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "21"
+}
+
+tasks.withType<DetektCreateBaselineTask>().configureEach {
+    jvmTarget = "21"
 }
