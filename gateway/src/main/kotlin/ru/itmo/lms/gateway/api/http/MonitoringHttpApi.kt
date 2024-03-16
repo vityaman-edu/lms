@@ -1,7 +1,6 @@
 package ru.itmo.lms.gateway.api.http
 
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import ru.itmo.lms.gateway.api.http.apis.MonitoringApi
 

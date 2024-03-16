@@ -5,6 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
     id("org.openapi.generator") version "5.3.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
 }
@@ -50,38 +51,41 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-fun generateOpenApiSpec(taskName: String, spec: String, pkg: String) =
-        tasks.register<GenerateTask>(taskName) {
-            group = "Open API Source Code Generation"
-            description = "Generates kotlin classes from an Open API specification"
-            verbose = false
-            generatorName = "kotlin-spring"
-            inputSpec = spec
-            outputDir = "${layout.projectDirectory}/build/generated"
-            packageName = pkg
-            modelPackage = pkg
-            generateModelTests = false
-            generateApiTests = false
-            configOptions = mapOf(
-                    "serializationLibrary" to "jackson",
-                    "enumPropertyNaming" to "UPPERCASE",
-                    "dateLibrary" to "java8",
-                    "bigDecimalAsString" to "true",
-                    "hideGenerationTimestamp" to "true",
-                    "useBeanValidation" to "false",
-                    "performBeanValidation" to "false",
-                    "openApiNullable" to "false",
-                    "reactive" to "true",
-                    "interfaceOnly" to "true",
-            )
-        }
+fun generateOpenApiSpec(
+    taskName: String,
+    spec: String,
+    pkg: String,
+) = tasks.register<GenerateTask>(taskName) {
+    group = "Open API Source Code Generation"
+    description = "Generates kotlin classes from an Open API specification"
+    verbose = false
+    generatorName = "kotlin-spring"
+    inputSpec = spec
+    outputDir = "${layout.projectDirectory}/build/generated"
+    packageName = pkg
+    modelPackage = pkg
+    generateModelTests = false
+    generateApiTests = false
+    configOptions =
+        mapOf(
+            "serializationLibrary" to "jackson",
+            "enumPropertyNaming" to "UPPERCASE",
+            "dateLibrary" to "java8",
+            "bigDecimalAsString" to "true",
+            "hideGenerationTimestamp" to "true",
+            "useBeanValidation" to "false",
+            "performBeanValidation" to "false",
+            "openApiNullable" to "false",
+            "reactive" to "true",
+            "interfaceOnly" to "true",
+        )
+}
 
 generateOpenApiSpec(
-        taskName = "generateApi",
-        spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml",
-        pkg = "ru.itmo.lms.gateway.api.http",
+    taskName = "generateApi",
+    spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml",
+    pkg = "ru.itmo.lms.gateway.api.http",
 )
-
 
 tasks.compileKotlin.configure {
     dependsOn(tasks.getByName("generateApi"))
@@ -91,6 +95,20 @@ sourceSets {
     main {
         java {
             srcDir("${layout.projectDirectory}/build/generated/src/main/kotlin")
+        }
+    }
+}
+
+ktlint {
+    filter {
+        exclude {
+            val directories = listOf("generated")
+            val path = it.file.path
+            directories.any { dir ->
+                listOf("\\$dir\\", "/$dir/").any { fragment ->
+                    path.contains(fragment)
+                }
+            }
         }
     }
 }
