@@ -51,17 +51,19 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-fun generateOpenApiSpec(
-    taskName: String,
-    spec: String,
-    pkg: String,
-) = tasks.register<GenerateTask>(taskName) {
-    group = "Open API Source Code Generation"
-    description = "Generates kotlin classes from an Open API specification"
+val generatedDir = "${layout.projectDirectory}/build/generated"
+val generateControllers = "generateControllers"
+
+tasks.register<GenerateTask>(generateControllers) {
+    val spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml"
+    val pkg = "ru.itmo.lms.gateway.api.http"
+
+    group = "openapi tools"
+    description = "Generates code from an Open API specification"
     verbose = false
     generatorName = "kotlin-spring"
     inputSpec = spec
-    outputDir = "${layout.projectDirectory}/build/generated"
+    outputDir = generatedDir
     packageName = pkg
     modelPackage = pkg
     generateModelTests = false
@@ -81,20 +83,14 @@ fun generateOpenApiSpec(
         )
 }
 
-generateOpenApiSpec(
-    taskName = "generateApi",
-    spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml",
-    pkg = "ru.itmo.lms.gateway.api.http",
-)
-
 tasks.compileKotlin.configure {
-    dependsOn(tasks.getByName("generateApi"))
+    dependsOn(tasks.getByName(generateControllers))
 }
 
 sourceSets {
     main {
         java {
-            srcDir("${layout.projectDirectory}/build/generated/src/main/kotlin")
+            srcDir("$generatedDir/src/main/kotlin")
         }
     }
 }
@@ -104,11 +100,9 @@ ktlint {
         exclude {
             val directories = listOf("generated")
             val path = it.file.path
-            directories.any { dir ->
-                listOf("\\$dir\\", "/$dir/").any { fragment ->
-                    path.contains(fragment)
-                }
-            }
+            directories
+                .flatMap { dir -> listOf("\\$dir\\", "/$dir/") }
+                .any { fragment -> path.contains(fragment) }
         }
     }
 }
