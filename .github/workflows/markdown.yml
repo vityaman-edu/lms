@@ -1,11 +1,6 @@
 ---
 name: Markdown Check
 on:
-  push:
-    paths:
-      - ".github/workflows/*"
-      - ".markdownlint.yaml"
-      - "**/*.md"
   pull_request:
     paths:
       - ".github/workflows/*"
