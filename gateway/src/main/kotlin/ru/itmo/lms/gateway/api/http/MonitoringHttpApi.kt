@@ -6,7 +6,6 @@ import ru.itmo.lms.gateway.api.http.apis.MonitoringApi
 
 @RestController
 class MonitoringHttpApi : MonitoringApi {
-    override suspend fun monitoringPingGet(): ResponseEntity<String> {
-        return ResponseEntity.ok("pong")
-    }
+    override suspend fun monitoringPingGet(): ResponseEntity<String> =
+        ResponseEntity.ok("pong")
 }
