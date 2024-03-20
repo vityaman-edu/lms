@@ -9,12 +9,16 @@ plugins {
     id("org.openapi.generator") version "5.3.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.5"
+    id("org.jetbrains.kotlinx.kover") version "0.7.6"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
 }
 
 group = "ru.itmo"
 version = "0.0.1"
+
+val jvmTarget = "21"
+val basePackage = "$group.lms.gateway"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -41,13 +45,14 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+    testImplementation(kotlin("test"))
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "21"
+        jvmTarget = jvmTarget
     }
 }
 
@@ -60,7 +65,7 @@ val generateControllers = "generateControllers"
 
 tasks.register<GenerateTask>(generateControllers) {
     val spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml"
-    val pkg = "ru.itmo.lms.gateway.api.http"
+    val pkg = "$basePackage.api.http"
 
     group = "openapi tools"
     description = "Generates code from an Open API specification"
@@ -131,9 +136,26 @@ tasks.withType<Detekt>().configureEach {
 }
 
 tasks.withType<Detekt>().configureEach {
-    jvmTarget = "21"
+    jvmTarget = jvmTarget
 }
 
 tasks.withType<DetektCreateBaselineTask>().configureEach {
-    jvmTarget = "21"
+    jvmTarget = jvmTarget
+}
+
+koverReport {
+    filters {
+        excludes {
+            classes(
+                "$basePackage.api.http.apis.*",
+                "$basePackage.GatewayApplicationKt",
+            )
+        }
+    }
+    verify {
+        rule {
+            isEnabled = true
+            bound { minValue = 80 }
+        }
+    }
 }
