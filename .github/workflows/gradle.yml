@@ -20,5 +20,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Execute Gradle Build of Gateway
-        run: (cd gateway && ./gradlew build)
+      - name: Build Gateway
+        run: (cd gateway && ./gradlew :build)
+
+      - name: Test Gateway
+        run: (cd gateway && ./gradlew :koverHtmlReport)
+
