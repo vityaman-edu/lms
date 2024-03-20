@@ -1,11 +1,11 @@
-package ru.itmo.lms.gateway
+package ru.itmo.lms.monolith
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class GatewayApplication
+class LMSApplication
 
 fun main(args: Array<String>) {
-    runApplication<GatewayApplication>(args = args)
+    runApplication<LMSApplication>(args = args)
 }

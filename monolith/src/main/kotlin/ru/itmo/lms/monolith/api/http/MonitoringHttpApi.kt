@@ -1,8 +1,8 @@
-package ru.itmo.lms.gateway.api.http
+package ru.itmo.lms.monolith.api.http
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
-import ru.itmo.lms.gateway.api.http.apis.MonitoringApi
+import ru.itmo.lms.monolith.api.http.apis.MonitoringApi
 
 @RestController
 class MonitoringHttpApi : MonitoringApi {

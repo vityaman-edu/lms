@@ -60,7 +60,7 @@ val generateControllers = "generateControllers"
 
 tasks.register<GenerateTask>(generateControllers) {
     val spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml"
-    val pkg = "ru.itmo.lms.gateway.api.http"
+    val pkg = "ru.itmo.lms.monolith.api.http"
 
     group = "openapi tools"
     description = "Generates code from an Open API specification"

@@ -3,7 +3,7 @@ name: Gradle Build Check
 on:
   pull_request:
     paths:
-      - "gateway/**"
+      - "monolith/**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,5 +20,5 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Execute Gradle Build of Gateway
-        run: (cd gateway && ./gradlew build)
+      - name: Execute Gradle Build of the Monolith
+        run: (cd monolith && ./gradlew build)

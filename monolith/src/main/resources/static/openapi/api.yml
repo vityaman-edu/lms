@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: LMS Gateway
+  title: LMS Monolith
   version: 0.0.1
 servers:
   - url: /api/v1
