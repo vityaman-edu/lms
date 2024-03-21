@@ -4,14 +4,25 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
+    kotlin("jvm") version "1.9.22"
+
+    // Spring
+    kotlin("plugin.spring") version "1.9.22"
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
+
+    // OpenAPI
     id("org.openapi.generator") version "5.3.0"
+
+    // Linters
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.5"
+
+    // Code Coverage
     id("org.jetbrains.kotlinx.kover") version "0.7.6"
-    kotlin("jvm") version "1.9.22"
-    kotlin("plugin.spring") version "1.9.22"
+
+    // JOOQ
+    id("org.jooq.jooq-codegen-gradle") version "3.19.6"
 }
 
 group = "ru.itmo"
@@ -19,6 +30,8 @@ version = "0.0.1"
 
 val jvmTarget = "21"
 val basePackage = "$group.lms.gateway"
+
+val jooqVersion = "3.19.6"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -35,17 +48,41 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    // Spring
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    // Reactive Web API
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // Open API
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    // r2dbc and spring data r2dbc
+    // implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    // runtimeOnly("org.postgresql:r2dbc-postgresql")
+
+    // jooq
+    implementation("org.jooq:jooq:$jooqVersion")
+    implementation("org.jooq:jooq-kotlin:$jooqVersion")
+    jooqCodegen("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
+    jooqCodegen("org.jooq:jooq-meta-extensions:$jooqVersion")
+    jooqCodegen("org.jooq:jooq-meta-kotlin:$jooqVersion")
+    jooqCodegen("org.postgresql:postgresql:42.7.2")
+    jooqCodegen("org.testcontainers:postgresql:1.19.7")
+    jooqCodegen("org.testcontainers:testcontainers:1.19.7")
+
+    // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation(kotlin("test"))
+
+    // Linting
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
 }
 
@@ -72,7 +109,7 @@ tasks.register<GenerateTask>(generateControllers) {
     verbose = false
     generatorName = "kotlin-spring"
     inputSpec = spec
-    outputDir = generatedDir
+    outputDir = "$generatedDir/openapi"
     packageName = pkg
     modelPackage = pkg
     generateModelTests = false
@@ -99,7 +136,8 @@ tasks.compileKotlin.configure {
 sourceSets {
     main {
         java {
-            srcDir("$generatedDir/src/main/kotlin")
+            srcDir("$generatedDir/openapi/src/main/kotlin")
+            srcDir("$generatedDir/jooq/src/main/kotlin")
         }
     }
 }
@@ -156,6 +194,50 @@ koverReport {
         rule {
             isEnabled = true
             bound { minValue = 80 }
+        }
+    }
+}
+
+jooq {
+    version = jooqVersion
+    configuration { }
+    executions {
+        create("main") {
+            configuration {
+                logging = org.jooq.meta.jaxb.Logging.DEBUG
+                jdbc {
+                    driver = "org.testcontainers.jdbc.ContainerDatabaseDriver"
+                    url = "jdbc:tc:postgresql:16:///test?TC_TMPFS=/testtmpfs:rw&amp;TC_INITSCRIPT=file:src/main/resources/database/schema.sql"
+                    username = "postgres"
+                    password = "postgres"
+                }
+                generator {
+                    name = "org.jooq.codegen.KotlinGenerator"
+                    database {
+                        name = "org.jooq.meta.postgres.PostgresDatabase"
+                        inputSchema = "lms"
+                        includes = ".*"
+                        properties {
+                            property {
+                                key = "scripts"
+                                value = "src/main/resources/database/schema.sql"
+                            }
+                            property {
+                                key = "defaultNameCase"
+                                value = "lower"
+                            }
+                        }
+                    }
+                    generate {
+                        isPojosAsKotlinDataClasses = true
+                        isImplicitJoinPathsToMany = false
+                    }
+                    target {
+                        packageName = "$basePackage.storage.jooq"
+                        directory = "$generatedDir/jooq/main"
+                    }
+                }
+            }
         }
     }
 }
