@@ -4,8 +4,8 @@ data class Note(
     val id: Id,
     val content: String,
 ) {
-    companion object {
-        @JvmInline
-        value class Id(val value: Long)
-    }
+    @JvmInline
+    value class Id(val value: Long)
+
+    data class Draft(val content: String)
 }

@@ -93,7 +93,7 @@ tasks.register<OpenAPIGenerateTask>(generateControllers) {
     val spec = "$projectDir/src/main/resources/static/openapi/api.yml"
     val pkg = "$basePackage.api.http"
 
-    group = "openapi tools"
+    group = "openapi"
     description = "Generates code from an Open API specification"
     verbose = false
     generatorName = "kotlin-spring"
@@ -101,6 +101,7 @@ tasks.register<OpenAPIGenerateTask>(generateControllers) {
     outputDir = "$generatedDir/openapi"
     packageName = pkg
     modelPackage = pkg
+    modelNameSuffix = "Message"
     generateModelTests = false
     generateApiTests = false
     configOptions =
@@ -176,6 +177,7 @@ koverReport {
             classes(
                 "$basePackage.api.http.apis.*",
                 "$basePackage.GatewayApplicationKt",
+                "$basePackage.storage.jooq.**",
             )
         }
     }
@@ -220,4 +222,12 @@ jooq {
             }
         }
     }
+}
+
+tasks.compileKotlin.configure {
+    dependsOn(tasks.jooqCodegen)
+}
+
+tasks.runKtlintCheckOverMainSourceSet {
+    dependsOn(tasks.jooqCodegen)
 }
