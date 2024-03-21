@@ -6,7 +6,6 @@ import org.junit.jupiter.api.*
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.testcontainers.junit.jupiter.Testcontainers
 import ru.itmo.lms.gateway.BaseTestSuite
 import ru.itmo.lms.gateway.api.http.NoteDraftMessage
 import ru.itmo.lms.gateway.api.http.NoteMessage

@@ -8,6 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.utility.MountableFile
 
+@Suppress("UtilityClassWithPublicConstructor")
 abstract class BaseTestSuite {
     companion object {
         @Container
