@@ -56,8 +56,8 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    // implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    // runtimeOnly("org.postgresql:r2dbc-postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    runtimeOnly("org.postgresql:r2dbc-postgresql")
 
     implementation("org.jooq:jooq:$jooqVersion")
     implementation("org.jooq:jooq-kotlin:$jooqVersion")
@@ -67,8 +67,12 @@ dependencies {
     jooqCodegen("org.postgresql:postgresql:42.7.2")
     jooqCodegen("org.testcontainers:postgresql:$testcontainersVersion")
     jooqCodegen("org.testcontainers:testcontainers:$testcontainersVersion")
+    testImplementation("org.testcontainers:r2dbc:$testcontainersVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation(kotlin("test"))
 
@@ -211,12 +215,15 @@ jooq {
                         includes = ".*"
                     }
                     generate {
+                        isImmutablePojos = true
                         isPojosAsKotlinDataClasses = true
+                        isKotlinNotNullPojoAttributes = true
+                        isKotlinNotNullRecordAttributes = true
                         isImplicitJoinPathsToMany = false
                     }
                     target {
                         packageName = "$basePackage.storage.jooq"
-                        directory = "$generatedDir/jooq/main"
+                        directory = "$generatedDir/jooq/src/main/kotlin"
                     }
                 }
             }
