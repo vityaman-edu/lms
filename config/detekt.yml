@@ -86,7 +86,7 @@ naming:
     minimumVariableNameLength: 1
   VariableMaxLength:
     active: true
-    maximumVariableNameLength: 20
+    maximumVariableNameLength: 24
 
 performance:
   CouldBeSequence:

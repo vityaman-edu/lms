@@ -1,27 +1,22 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask as OpenAPIGenerateTask
 
 plugins {
     kotlin("jvm") version "1.9.22"
 
-    // Spring
     kotlin("plugin.spring") version "1.9.22"
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
 
-    // OpenAPI
     id("org.openapi.generator") version "5.3.0"
 
-    // Linters
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.5"
 
-    // Code Coverage
     id("org.jetbrains.kotlinx.kover") version "0.7.6"
 
-    // JOOQ
     id("org.jooq.jooq-codegen-gradle") version "3.19.6"
 }
 
@@ -32,6 +27,7 @@ val jvmTarget = "21"
 val basePackage = "$group.lms.gateway"
 
 val jooqVersion = "3.19.6"
+val testcontainersVersion = "1.19.7"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -50,39 +46,32 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
-    // Spring
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    // Reactive Web API
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-    // Open API
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    // r2dbc and spring data r2dbc
     // implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     // runtimeOnly("org.postgresql:r2dbc-postgresql")
 
-    // jooq
     implementation("org.jooq:jooq:$jooqVersion")
     implementation("org.jooq:jooq-kotlin:$jooqVersion")
     jooqCodegen("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
     jooqCodegen("org.jooq:jooq-meta-extensions:$jooqVersion")
     jooqCodegen("org.jooq:jooq-meta-kotlin:$jooqVersion")
     jooqCodegen("org.postgresql:postgresql:42.7.2")
-    jooqCodegen("org.testcontainers:postgresql:1.19.7")
-    jooqCodegen("org.testcontainers:testcontainers:1.19.7")
+    jooqCodegen("org.testcontainers:postgresql:$testcontainersVersion")
+    jooqCodegen("org.testcontainers:testcontainers:$testcontainersVersion")
 
-    // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation(kotlin("test"))
 
-    // Linting
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.3")
 }
 
@@ -97,11 +86,11 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-val generatedDir = "${layout.projectDirectory}/build/generated"
+val generatedDir = "$projectDir/build/generated"
 val generateControllers = "generateControllers"
 
-tasks.register<GenerateTask>(generateControllers) {
-    val spec = "${layout.projectDirectory}/src/main/resources/static/openapi/api.yml"
+tasks.register<OpenAPIGenerateTask>(generateControllers) {
+    val spec = "$projectDir/src/main/resources/static/openapi/api.yml"
     val pkg = "$basePackage.api.http"
 
     group = "openapi tools"
@@ -161,7 +150,7 @@ tasks.runKtlintCheckOverMainSourceSet {
 detekt {
     buildUponDefaultConfig = true
     allRules = false
-    config.setFrom(file("${layout.projectDirectory}/../config/detekt.yml"))
+    config.setFrom(file("$projectDir/../config/detekt.yml"))
 }
 
 tasks.withType<Detekt>().configureEach {
@@ -199,15 +188,16 @@ koverReport {
 }
 
 jooq {
+    val schemaSql = "src/main/resources/database/schema.sql"
+
     version = jooqVersion
-    configuration { }
     executions {
         create("main") {
             configuration {
                 logging = org.jooq.meta.jaxb.Logging.DEBUG
                 jdbc {
                     driver = "org.testcontainers.jdbc.ContainerDatabaseDriver"
-                    url = "jdbc:tc:postgresql:16:///test?TC_TMPFS=/testtmpfs:rw&amp;TC_INITSCRIPT=file:src/main/resources/database/schema.sql"
+                    url = "jdbc:tc:postgresql:16:///test?TC_TMPFS=/testtmpfs:rw&amp;TC_INITSCRIPT=file:$schemaSql"
                     username = "postgres"
                     password = "postgres"
                 }
@@ -217,16 +207,6 @@ jooq {
                         name = "org.jooq.meta.postgres.PostgresDatabase"
                         inputSchema = "lms"
                         includes = ".*"
-                        properties {
-                            property {
-                                key = "scripts"
-                                value = "src/main/resources/database/schema.sql"
-                            }
-                            property {
-                                key = "defaultNameCase"
-                                value = "lower"
-                            }
-                        }
                     }
                     generate {
                         isPojosAsKotlinDataClasses = true
