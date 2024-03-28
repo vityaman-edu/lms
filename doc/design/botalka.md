@@ -71,9 +71,7 @@ C4Context
 erDiagram
   user {
     integer id          PK
-    integer telegram_id UK
-    string  first_name
-    string  last_name
+    string  alias       UN
   }
 
   student {
@@ -88,7 +86,7 @@ erDiagram
     integer   id          PK
     string    title
     string    description
-    integer   weigth
+    integer   weight
     timestamp post_moment "nullable"
   }
 
@@ -113,6 +111,8 @@ erDiagram
   homework_submission }o--|| homework : for
   teacher ||--o{ homework_feedback : answer
   homework_feedback }o--|| homework_submission : for
+  user ||--o{ student : is
+  user ||--o{ teacher : is
 ```
 
 ## HTTP API
