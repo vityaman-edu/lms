@@ -24,7 +24,7 @@ group = "ru.itmo"
 version = "0.0.1"
 
 val jvmTarget = "21"
-val basePackage = "$group.lms.gateway"
+val basePackage = "$group.lms.botalka"
 
 val jooqVersion = "3.19.6"
 val testcontainersVersion = "1.19.7"
@@ -180,7 +180,7 @@ koverReport {
         excludes {
             classes(
                 "$basePackage.api.http.apis.*",
-                "$basePackage.GatewayApplicationKt",
+                "$basePackage.BotalkaApplicationKt",
                 "$basePackage.storage.jooq.**",
             )
         }

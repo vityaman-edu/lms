@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gateway
+    name: botalka
   r2dbc:
     url: r2dbc:postgresql://localhost:5432/postgres
     username: postgres

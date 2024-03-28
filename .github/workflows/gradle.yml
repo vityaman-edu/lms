@@ -3,7 +3,7 @@ name: Gradle Build Check
 on:
   pull_request:
     paths:
-      - "gateway/**"
+      - "botalka/**"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,4 +21,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build Gateway
-        run: (cd gateway && ./gradlew :build)
+        run: (cd botalka && ./gradlew :build)
