@@ -6,8 +6,6 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.jooq.DSLContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import ru.itmo.lms.gateway.domain.model.Note
 import ru.itmo.lms.gateway.storage.NoteStorage
 import ru.itmo.lms.gateway.storage.jooq.entity.toModel
@@ -18,24 +16,18 @@ import ru.itmo.lms.gateway.storage.jooq.tables.references.NOTE
 class JooqNoteStorage(
     @Autowired private val dsl: DSLContext,
 ) : NoteStorage {
-    override fun getAll(): Flow<Note> {
-        val sql = dsl
-            .selectFrom(NOTE)
-
-        return Flux.from(sql)
+    override fun getAll(): Flow<Note> =
+        dsl.selectFrom(NOTE)
+            .toFlux()
             .map { it.toModel() }
             .asFlow()
-    }
 
-    override suspend fun create(note: Note.Draft): Note {
-        val sql = dsl
-            .insertInto(NOTE, NOTE.CONTENT)
+    override suspend fun create(note: Note.Draft): Note =
+        dsl.insertInto(NOTE, NOTE.CONTENT)
             .values(note.content)
             .returningResult(NOTE.ID, NOTE.CONTENT)
-
-        return Mono.from(sql)
-            .map { row -> NoteRecord(row.value1()!!, row.value2()!!) }
+            .toMono()
+            .map { NoteRecord(it[NOTE.ID]!!, it[NOTE.CONTENT]!!) }
             .map { it.toModel() }
             .awaitSingle()
-    }
 }
