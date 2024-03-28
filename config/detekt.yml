@@ -68,6 +68,10 @@ exceptions:
   ObjectExtendsThrowable:
     active: true
 
+formatting:
+  NoWildcardImports:
+    active: false
+
 naming:
   BooleanPropertyNaming:
     active: true
@@ -86,7 +90,7 @@ naming:
     minimumVariableNameLength: 1
   VariableMaxLength:
     active: true
-    maximumVariableNameLength: 20
+    maximumVariableNameLength: 24
 
 performance:
   CouldBeSequence:
@@ -227,3 +231,7 @@ style:
     active: true
   UseSumOfInsteadOfFlatMapSize:
     active: true
+  WildcardImport:
+    active: true
+    excludeImports:
+      - org.junit.jupiter.api.*

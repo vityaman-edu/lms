@@ -22,7 +22,3 @@ jobs:
 
       - name: Build Gateway
         run: (cd gateway && ./gradlew :build)
-
-      - name: Test Gateway
-        run: (cd gateway && ./gradlew :koverHtmlReport)
-

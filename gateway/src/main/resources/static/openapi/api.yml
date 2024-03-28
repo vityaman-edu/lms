@@ -18,3 +18,55 @@ paths:
               schema:
                 type: string
                 example: pong
+  /notes:
+    get:
+      tags: [ Notes ]
+      summary: Returns all saved notes
+      description:
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+    post:
+      tags: [ Notes ]
+      summary: Creates a note
+      description:
+      requestBody:
+        description: Draft of a note.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteDraft'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+components:
+  schemas:
+    NoteDraft:
+      required:
+        - content
+      type: object
+      properties:
+        content:
+          type: string
+    Note:
+      type: object
+      required:
+        - id
+        - content
+      properties:
+        id:
+          type: integer
+          format: int64
+        content:
+          type: string
