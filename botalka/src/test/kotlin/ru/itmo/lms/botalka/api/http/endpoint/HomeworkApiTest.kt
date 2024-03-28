@@ -2,6 +2,7 @@ package ru.itmo.lms.botalka.api.http.endpoint
 
 import io.kotest.matchers.collections.shouldBeUnique
 import io.kotest.matchers.date.shouldBeAfter
+import io.kotest.matchers.date.shouldHaveSameInstantAs
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -61,11 +62,11 @@ class HomeworkApiTest(
             }
         }
 
-        draftToResultList.forEach { (draft, result) ->
-            draft.title.text shouldBe result.title
-            draft.description.text shouldBe result.description
-            draft.maxScore.value shouldBe result.maxScore
-            draft.publicationMoment shouldBe result.publicationMoment
+        draftToResultList.forEach { (l, r) ->
+            l.title.text shouldBe r.title
+            l.description.text shouldBe r.description
+            l.maxScore.value shouldBe r.maxScore
+            l.publicationMoment shouldHaveSameInstantAs r.publicationMoment
         }
 
         val results = draftToResultList.map { it.second }
