@@ -8,8 +8,8 @@ paths:
   /monitoring/ping:
     get:
       tags: [ Monitoring ]
-      summary: Проверяет, жив ли сервис
-      description: Вернет pong, если сервис жив, иначе будем плакать.
+      summary: Checks if service is alive
+      description: Returns 'pong', if service is alive, else we will cry
       responses:
         200:
           description: OK
@@ -18,6 +18,31 @@ paths:
               schema:
                 type: string
                 example: pong
+  /homework:
+    post:
+      tags: [ Homework ]
+      summary: Creates a homework
+      description: Creates a homework to be published at specified time
+      requestBody:
+        description: A draft of homework to post
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeworkDraft'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        400:
+          description: Homework is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneralError'
   /notes:
     get:
       tags: [ Notes ]
@@ -52,6 +77,78 @@ paths:
                 $ref: '#/components/schemas/Note'
 components:
   schemas:
+    HomeworkId:
+      type: integer
+      description: A unique key for of a homework
+      example: 143
+    HomeworkTitle:
+      type: string
+      description: Short Description of the Task
+      example: Serial lock-free Mutex with symmetrical control transmission
+    HomeworkDescription:
+      type: string
+      description: Long Description of the Task
+      example: |
+        1. Implement synchronization primitives:
+          1.1 Event
+          1.2 Mutex
+          1.3 Wait Group
+        2. Optimize dynamic allocations
+        3. Write a Strand from the fiber/strand task
+        4. Write a lock-free implementation of synchronization primitives
+        5. Write a serial lock-free Mutex with symmetrical control transmission
+    HomeworkScore:
+      type: integer
+      description: A grade for completion of task
+      example: 500
+    HomeworkPublicationMoment:
+      type: string
+      format: date-time
+      description: A moment when this homework must be published
+      example: 2024-03-11T12:00:00Z
+    CreationMoment:
+      type: string
+      format: date-time
+      description: A moment when this object was created
+      example: 2024-04-14T13:32:42Z
+    HomeworkDraft:
+      type: object
+      required:
+        - title
+        - description
+        - max_score
+        - publication_moment
+      properties:
+        title:
+          $ref: '#/components/schemas/HomeworkTitle'
+        description:
+          $ref: '#/components/schemas/HomeworkDescription'
+        max_score:
+          $ref: '#/components/schemas/HomeworkScore'
+        publication_moment:
+          $ref: '#/components/schemas/HomeworkPublicationMoment'
+    Homework:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - max_score
+        - publication_moment
+        - creation_moment
+      properties:
+        id:
+          $ref: '#/components/schemas/HomeworkId'
+        title:
+          $ref: '#/components/schemas/HomeworkTitle'
+        description:
+          $ref: '#/components/schemas/HomeworkDescription'
+        max_score:
+          $ref: '#/components/schemas/HomeworkScore'
+        publication_moment:
+          $ref: '#/components/schemas/HomeworkPublicationMoment'
+        creation_moment:
+          $ref: '#/components/schemas/CreationMoment'
     NoteDraft:
       required:
         - content
@@ -70,3 +167,19 @@ components:
           format: int64
         content:
           type: string
+    GeneralError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: HTTP Status Code
+          example: 400
+        status:
+          type: string
+          description: HTTP Status Description
+          example: Bad Request
+        message:
+          type: string
+          description: Detailed Message
+          example: Username must contain only latin letter

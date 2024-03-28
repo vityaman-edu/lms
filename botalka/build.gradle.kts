@@ -10,7 +10,7 @@ plugins {
     id("org.springframework.boot") version "3.2.3"
     id("io.spring.dependency-management") version "1.1.4"
 
-    id("org.openapi.generator") version "5.3.0"
+    id("org.openapi.generator") version "7.4.0"
 
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.5"
@@ -28,6 +28,7 @@ val basePackage = "$group.lms.botalka"
 
 val jooqVersion = "3.19.6"
 val testcontainersVersion = "1.19.7"
+val kotestVersion = "5.8.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -55,9 +56,12 @@ dependencies {
 
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.4.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
 
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
+
+    implementation("org.apache.commons:commons-lang3:3.14.0")
 
     implementation("org.jooq:jooq:$jooqVersion")
     implementation("org.jooq:jooq-kotlin:$jooqVersion")
@@ -69,8 +73,13 @@ dependencies {
     jooqCodegen("org.testcontainers:testcontainers:$testcontainersVersion")
     testImplementation("org.testcontainers:r2dbc:$testcontainersVersion")
 
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest:kotest-property:$kotestVersion")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("io.projectreactor:reactor-test")
@@ -106,17 +115,14 @@ tasks.register<OpenAPIGenerateTask>(generateControllers) {
     packageName = pkg
     modelPackage = pkg
     modelNameSuffix = "Message"
-    generateModelTests = false
+    generateModelTests = true
     generateApiTests = false
     configOptions =
         mapOf(
+            "useSpringBoot3" to "true",
             "serializationLibrary" to "jackson",
+            "dateLibrary" to "kotlinx-datetime",
             "enumPropertyNaming" to "UPPERCASE",
-            "dateLibrary" to "java8",
-            "bigDecimalAsString" to "true",
-            "hideGenerationTimestamp" to "true",
-            "useBeanValidation" to "false",
-            "performBeanValidation" to "false",
             "openApiNullable" to "false",
             "reactive" to "true",
             "interfaceOnly" to "true",
@@ -194,7 +200,13 @@ koverReport {
 }
 
 jooq {
-    val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
+    val jdbcUrl = {
+        val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
+        val protocol = "jdbc:tc:postgresql:16"
+        val tmpfs = "TC_TMPFS=/testtmpfs:rw&amp"
+        val script = "TC_INITSCRIPT=file:$schemaSql"
+        "$protocol:///test?$tmpfs;$script"
+    }
 
     executions {
         create("main") {
@@ -202,7 +214,7 @@ jooq {
                 logging = org.jooq.meta.jaxb.Logging.DEBUG
                 jdbc {
                     driver = "org.testcontainers.jdbc.ContainerDatabaseDriver"
-                    url = "jdbc:tc:postgresql:16:///test?TC_TMPFS=/testtmpfs:rw&amp;TC_INITSCRIPT=file:$schemaSql"
+                    url = jdbcUrl()
                     username = "postgres"
                     password = "postgres"
                 }
