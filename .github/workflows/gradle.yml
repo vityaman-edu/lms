@@ -21,4 +21,4 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build Gateway
-        run: (cd botalka && ./gradlew :build)
+        run: (./gradlew :botalka:build)

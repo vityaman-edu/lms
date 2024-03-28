@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  botalka:
+    container_name: lms-botalka
+    build:
+      context: botalka
+      dockerfile: Dockerfile
+    image: botalka:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - lms-network
+  database:
+    container_name: lms-database
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./botalka/src/main/resources/database:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - lms-network
+networks:
+  lms-network:
+    driver: bridge
+

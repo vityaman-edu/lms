@@ -155,7 +155,7 @@ tasks.runKtlintCheckOverMainSourceSet {
 detekt {
     buildUponDefaultConfig = true
     allRules = false
-    config.setFrom(file("$projectDir/../config/detekt.yml"))
+    config.setFrom(file("$rootDir/config/detekt.yml"))
 }
 
 tasks.withType<Detekt>().configureEach {
@@ -194,9 +194,8 @@ koverReport {
 }
 
 jooq {
-    val schemaSql = "src/main/resources/database/schema.sql"
+    val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
 
-    version = jooqVersion
     executions {
         create("main") {
             configuration {
