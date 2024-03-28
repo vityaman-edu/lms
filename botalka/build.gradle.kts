@@ -194,7 +194,7 @@ koverReport {
 }
 
 jooq {
-    val schemaSql = "${sourceSets.main.get().output.resourcesDir}/database/schema.sql"
+    val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
 
     executions {
         create("main") {
