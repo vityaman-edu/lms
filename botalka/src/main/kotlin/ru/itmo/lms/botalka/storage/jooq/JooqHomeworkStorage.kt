@@ -25,7 +25,7 @@ class JooqHomeworkStorage(
                 homework.title.text,
                 homework.description.text,
                 homework.maxScore.value,
-                homework.publicationMoment.toLocalDateTime(),
+                homework.publicationMoment,
             )
             .returningResult(HOMEWORK.fields().asList())
             .coerce(HOMEWORK)

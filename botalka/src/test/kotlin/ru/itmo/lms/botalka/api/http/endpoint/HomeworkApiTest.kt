@@ -12,7 +12,6 @@ import org.springframework.test.context.ContextConfiguration
 import ru.itmo.lms.botalka.TestContainerInitializer
 import ru.itmo.lms.botalka.api.http.apis.HomeworkApi
 import ru.itmo.lms.botalka.api.http.message.toMessage
-import ru.itmo.lms.botalka.config.Config
 import ru.itmo.lms.botalka.domain.model.Homework
 import java.time.OffsetDateTime
 
@@ -26,31 +25,31 @@ class HomeworkApiTest(
             Homework.Title("Test Homework 1"),
             Homework.Description("Test Homework 1 Description"),
             Homework.Score(100),
-            datetime("2024-04-01T10:15:30"),
+            OffsetDateTime.parse("2024-04-01T10:15:30+03:00"),
         ),
         Homework.Draft(
             Homework.Title("Test Homework 2"),
             Homework.Description("Test Homework 2 Description"),
             Homework.Score(250),
-            datetime("2024-05-01T12:00:30"),
+            OffsetDateTime.parse("2024-05-01T12:00:30+03:00"),
         ),
         Homework.Draft(
             Homework.Title("Test Homework 3"),
             Homework.Description("Test Homework 3 Description"),
             Homework.Score(100),
-            datetime("2024-05-02T12:00:30"),
+            OffsetDateTime.parse("2024-05-02T12:00:30+03:00"),
         ),
         Homework.Draft(
             Homework.Title("Test Homework 4"),
             Homework.Description("Test Homework 4 Description"),
             Homework.Score(300),
-            datetime("2024-05-02T12:00:30"),
+            OffsetDateTime.parse("2024-05-02T12:00:30+03:00"),
         ),
     )
 
     @Test
     fun createHomework() {
-        val startingPoint = OffsetDateTime.now(Config.zoneOffset)
+        val startingPoint = OffsetDateTime.now()
 
         val draftToResultList = runBlocking {
             drafts.map { draft ->
@@ -77,7 +76,4 @@ class HomeworkApiTest(
         val ids = results.map { it.id }
         ids.shouldBeUnique()
     }
-
-    private fun datetime(code: String) =
-        OffsetDateTime.parse("$code${Config.zoneOffset}")
 }

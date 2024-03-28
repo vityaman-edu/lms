@@ -11,7 +11,7 @@ CHECK (VALUE ~ '[a-zA-Z''-]{3,31}');
 CREATE TABLE lms.user (
     id              serial      PRIMARY KEY,
     alias           lms.alias   UNIQUE NOT NULL,
-    creation_moment timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    creation_moment timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE lms.teacher (
@@ -30,8 +30,8 @@ CREATE TABLE lms.homework (
     title               varchar(64) NOT NULL,
     description         text        NOT NULL,
     max_score           lms.score   NOT NULL,
-    publication_moment  timestamp   NOT NULL,
-    creation_moment     timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    publication_moment  timestamptz NOT NULL,
+    creation_moment     timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE lms.homework_submission (
@@ -39,7 +39,7 @@ CREATE TABLE lms.homework_submission (
     homework_id     integer     NOT NULL REFERENCES lms.homework(id),
     student_id      integer     NOT NULL REFERENCES lms.student(user_id),
     comment         text        NOT NULL,
-    creation_moment timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    creation_moment timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE lms.homework_feedback (
@@ -49,5 +49,5 @@ CREATE TABLE lms.homework_feedback (
     teacher_id      integer     NOT NULL REFERENCES lms.teacher(user_id),
     comment         text        NOT NULL,
     score           lms.score,  -- NULLABLE
-    creation_moment timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP
+    creation_moment timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
