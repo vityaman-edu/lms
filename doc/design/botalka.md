@@ -89,6 +89,11 @@ erDiagram
     integer   weight
     timestamp post_moment "nullable"
   }
+  
+  homework_workspace {
+    integer   homework_id PK, FK
+    integer   student_id  PK, FK
+  }
 
   homework_submission {
     integer   id          PK
@@ -100,7 +105,8 @@ erDiagram
 
   homework_feedback {
     integer   id            PK
-    integer   submission_id FK
+    integer   homework_id   FK
+    integer   student_id    FK
     integer   teacher_id    FK
     string    comment
     integer   score         "nullable"
@@ -108,9 +114,9 @@ erDiagram
   }
 
   student ||--o{ homework_submission : submit
-  homework_submission }o--|| homework : for
+  homework_submission }o--|| homework_workspace : for
   teacher ||--o{ homework_feedback : answer
-  homework_feedback }o--|| homework_submission : for
+  homework_feedback }o--|| homework_workspace : for
   user ||--o{ student : is
   user ||--o{ teacher : is
 ```
@@ -118,23 +124,22 @@ erDiagram
 ## HTTP API
 
 ```kotlin
-interface Botalka.Api.Http {
-  data class Homework.Result(Student.Id, List<Teacher.Id>, Homework.Grade)
-
-  fun `POST  /homework`(Homework.Draft): Homework
-  fun `PATCH /homework`(Homework.Draft): Homework
-  fun `POST  /homework/{}/submission`(Submission.Draft): Submission
-  fun `POST  /homework/{}/submission/{}/feedback`(Feedback.Draft): Feedback
-  fun `GET   /homework/{}/result`(): List[Workspace.Result]
+object BotalkaHttpApi {
+  val `POST  /homework`: (Homework.Draft) -> Homework
+  val `GET   /homework/list`: () -> List<Homework.Header>
+  val `POST  /homework/{}/workspace/{}/submission`: (Workspace.Id, Submission.Draft) -> Submission
+  val `POST  /homework/{}/workspace/{}/feedback`: (Workspace.Id, Feedback.Draft) -> Feedback
+  val `GET   /homework/{}/workspace/{}`: (Workspace.Id) -> Workspace
+  val `GET   /homework/{}/result`: (Homework.Id) -> List<Homework.Result>
 }
 ```
 
 ## Produced Events
 
 ```kotlin
-interface Botalka.Event {
-  data class HomeworkPosted(Homework)
-  data class SubmissionAdded(Submission)
-  data class FeedbackAdded(Feedback)
+object BotalkaEvent {
+  class HomeworkPosted(homework: Homework)
+  class SubmissionAdded(submission: Submission)
+  class FeedbackAdded(feedback: Feedback)
 }
 ```
