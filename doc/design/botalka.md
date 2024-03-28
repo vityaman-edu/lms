@@ -2,31 +2,31 @@
 
 ## Overall Description
 
-Service manages hometask statements and submissions. It provides a way to
-create a hometask event post and schedule it to be published at specified
-time. Also it supports gradual hometask development for teacher by working
-with drafts. It stores each hometask description and attached files. After
-publication it recieves submissions and drives an interaction between teacher
+Service manages homework statements and submissions. It provides a way to
+create a homework event post and schedule it to be published at specified
+time. Also, it supports gradual homework development for teacher by working
+with drafts. It stores each homework description and attached files. After
+publication, it receives submissions and drives an interaction between teacher
 and student.
 
 I propose to have a Telegram Bot UI.
 
 ## Functional Requirements
 
-**FR1**. Teacher must be able to create a hometask statement draft.
+**FR1**. Teacher must be able to create a homework statement draft.
 
-**FR2**. Hometask statement must contain a title, text description and
+**FR2**. Homework statement must contain a title, text description and
          deadline.
 
-**FR3**. Hometask statement can have attached pdf files.
+**FR3**. Homework statement can have attached pdf files.
 
-**FR4**. Hometask publication can be scheduled to a given time moment.
+**FR4**. Homework publication can be scheduled to a given time moment.
 
-**FR5**. Service must store scheduled hometasks as well as drafts.
+**FR5**. Service must store scheduled homeworks as well as drafts.
 
-**FR6**. Service must send a notification when hometask is published.
+**FR6**. Service must send a notification when homework is published.
 
-**FR7**. Hometask statement must be readonly after publication for simplicity.
+**FR7**. Homework statement must be readonly after publication for simplicity.
 
 **FR8**. Student must be able to add submissions for the homework with
          text and attachments such as pdf document.
@@ -84,7 +84,7 @@ erDiagram
     integer user_id PK, FK
   }
 
-  hometask {
+  homework {
     integer   id          PK
     string    title
     string    description
@@ -92,15 +92,15 @@ erDiagram
     timestamp post_moment "nullable"
   }
 
-  hometask_submission {
+  homework_submission {
     integer   id          PK
-    integer   hometask_id FK
+    integer   homework_id FK
     integer   student_id  FK
     string    comment
     timestamp moment
   }
 
-  hometask_feedback {
+  homework_feedback {
     integer   id            PK
     integer   submission_id FK
     integer   teacher_id    FK
@@ -109,10 +109,10 @@ erDiagram
     timestamp moment
   }
 
-  student ||--o{ hometask_submission : submit
-  hometask_submission }o--|| hometask : for
-  teacher ||--o{ hometask_feedback : answer
-  hometask_feedback }o--|| hometask_submission : for
+  student ||--o{ homework_submission : submit
+  homework_submission }o--|| homework : for
+  teacher ||--o{ homework_feedback : answer
+  homework_feedback }o--|| homework_submission : for
 ```
 
 ## HTTP API
