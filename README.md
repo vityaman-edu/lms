@@ -7,7 +7,7 @@ A simple learning management system.
 ### Build the Botalka Service
 
 ```bash
-gradle :botalka:build
+gradle :botalka:bootJar
 ```
 
 ### Start infrastructure

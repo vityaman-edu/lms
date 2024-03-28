@@ -2,19 +2,23 @@ package ru.itmo.lms.botalka.api.http.endpoint
 
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.*
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation
+import org.junit.jupiter.api.Order
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import ru.itmo.lms.botalka.BaseTestSuite
+import org.springframework.test.context.ContextConfiguration
+import ru.itmo.lms.botalka.TestContainerInitializer
 import ru.itmo.lms.botalka.api.http.NoteDraftMessage
 import ru.itmo.lms.botalka.api.http.NoteMessage
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 @SpringBootTest
+@ContextConfiguration(initializers = [TestContainerInitializer::class])
 @TestMethodOrder(OrderAnnotation::class)
-class NotesApiTest(@Autowired private val api: NotesHttpApi) : BaseTestSuite() {
+class NotesApiTest(@Autowired private val api: NotesHttpApi) {
     private val contents = listOf(
         "Example note content",
         "It is just a text, nothing more",

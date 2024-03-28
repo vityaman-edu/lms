@@ -28,6 +28,7 @@ val basePackage = "$group.lms.botalka"
 
 val jooqVersion = "3.19.6"
 val testcontainersVersion = "1.19.7"
+val kotestVersion = "5.8.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -60,6 +61,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
 
+    implementation("org.apache.commons:commons-lang3:3.14.0")
+
     implementation("org.jooq:jooq:$jooqVersion")
     implementation("org.jooq:jooq-kotlin:$jooqVersion")
     jooqCodegen("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
@@ -69,6 +72,9 @@ dependencies {
     jooqCodegen("org.testcontainers:postgresql:$testcontainersVersion")
     jooqCodegen("org.testcontainers:testcontainers:$testcontainersVersion")
     testImplementation("org.testcontainers:r2dbc:$testcontainersVersion")
+
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    testImplementation("io.kotest:kotest-property:$kotestVersion")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -194,7 +200,13 @@ koverReport {
 }
 
 jooq {
-    val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
+    val jdbcUrl = {
+        val schemaSql = "$projectDir/src/main/resources/database/schema.sql"
+        val protocol = "jdbc:tc:postgresql:16"
+        val tmpfs = "TC_TMPFS=/testtmpfs:rw&amp"
+        val script = "TC_INITSCRIPT=file:$schemaSql"
+        "$protocol:///test?$tmpfs;$script"
+    }
 
     executions {
         create("main") {
@@ -202,7 +214,7 @@ jooq {
                 logging = org.jooq.meta.jaxb.Logging.DEBUG
                 jdbc {
                     driver = "org.testcontainers.jdbc.ContainerDatabaseDriver"
-                    url = "jdbc:tc:postgresql:16:///test?TC_TMPFS=/testtmpfs:rw&amp;TC_INITSCRIPT=file:$schemaSql"
+                    url = jdbcUrl()
                     username = "postgres"
                     password = "postgres"
                 }
